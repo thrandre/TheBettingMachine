@@ -4,16 +4,16 @@ namespace TheBettingMachine.App.Data.Sources
 {
 	internal class LocalDataSource : IStringDataSource
 	{
-		private readonly FileInfo _file;
+		private readonly string _path;
 
-		public LocalDataSource(FileInfo file)
+		public LocalDataSource(string path)
 		{
-			_file = file;
+			_path = path;
 		}
 
 		public string Read()
 		{
-			return File.ReadAllText(_file.FullName);
+			return File.ReadAllText(_path);
 		}
 	}
 }

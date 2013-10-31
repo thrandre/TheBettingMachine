@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq.Expressions;
 using CsvHelper;
 using CsvHelper.Configuration;
 using TheBettingMachine.App.Data.Readers;
@@ -9,55 +7,25 @@ using TheBettingMachine.App.Data.Sources;
 
 namespace TheBettingMachine.App.Data.Csv
 {
-	internal class CsvHelperAdapter : ICsvReader
+	internal class CsvHelperAdapter : IDataParser
 	{
 		private readonly CsvFactory _factory;
-		private readonly IStringDataReader _dataReader;
+		private readonly CsvConfiguration _configuration;
 
-		public CsvHelperAdapter(CsvFactory factory, IStringDataReader dataReader)
+		public CsvHelperAdapter(CsvFactory factory, CsvConfiguration configuration)
 		{
 			_factory = factory;
-			_dataReader = dataReader;
+			_configuration = configuration;
 		}
 
-		public IEnumerable<T> GetRecords<T>(IStringDataSource dataSource, IDictionary<int, Expression<Func<T, object>>> mappings)
+		public IEnumerable<T> GetRecords<T>(IStringDataSource dataSource, IStringDataReader dataReader)
 		{
-			var data = GetData(dataSource);
-			var config = BuildConfiguration(mappings);
-
-			return _factory.CreateReader(data, config).GetRecords<T>();
+			return _factory.CreateReader(GetData(dataSource, dataReader), _configuration).GetRecords<T>();
 		}
 
-		private CsvConfiguration BuildConfiguration<T>(IDictionary<int, Expression<Func<T, object>>> mappings)
+		private StringReader GetData(IStringDataSource dataSource, IStringDataReader dataReader)
 		{
-			var configuration = new CsvConfiguration();
-			configuration.RegisterClassMap(
-				new GenericClassMap<T>(mappings));
-
-			return configuration;
-		}
-
-		private StringReader GetData(IStringDataSource dataSource)
-		{
-			return new StringReader(_dataReader.Read(dataSource));
-		}
-
-		internal class GenericClassMap<T> : CsvClassMap<T>
-		{
-			private readonly IDictionary<int, Expression<Func<T, object>>> _mappings;
-
-			public GenericClassMap(IDictionary<int, Expression<Func<T, object>>> mappings)
-			{
-				_mappings = mappings;
-			}
-
-			public override void CreateMap()
-			{
-				foreach (var mapping in _mappings)
-				{
-					Map(mapping.Value).Index(mapping.Key);
-				}
-			}
+			return new StringReader(dataReader.Read(dataSource));
 		}
 	}
 }

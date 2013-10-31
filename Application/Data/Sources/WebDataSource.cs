@@ -5,9 +5,9 @@ namespace TheBettingMachine.App.Data.Sources
 {
 	internal class WebDataSource : IStringDataSource
 	{
-		private readonly Uri _url;
+		private readonly string _url;
 
-		public WebDataSource(Uri url)
+		public WebDataSource(string url)
 		{
 			_url = url;
 		}
